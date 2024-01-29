@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -110,10 +110,10 @@ class Model:
             X, y = sampler.fit_resample(X, y)
 
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42
+                X, y, test_size=0.2, random_state=42,stratify=y
             )
 
-            model =RandomForestClassifier()
+            model = MultinomialNB()
             model.fit(X_train, y_train)
             self.evaluate_model(model, X_test, y_test)
             pickle.dump(model, open("artifacts/model.pkl", "wb"))
