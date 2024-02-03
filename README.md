@@ -1,7 +1,7 @@
 # Web Scraping and Classification Web App Documentation
 
 ## Introduction
-This documentation outlines the features and functionality of a web application built with Streamlit, designed to scrape news data from specified URLs or dropdown selections. The scraped data is then classified using a RandomForestClassifier model with a 94%+ accuracy, trained on a custom dataset created for this purpose.
+This documentation outlines the features and functionality of a web application built with Streamlit, designed to scrape news data from specified URLs or dropdown selections. The scraped data is then classified using a MultinomialNB model with a 90%+ accuracy, trained on a custom dataset created for this purpose.
 
 ## Requirements
 To run the web app, ensure that you have the following installed:
@@ -27,7 +27,7 @@ Or run `pip3 install -r requirements.txt` which is available in the project dire
 - Utilizes the requests and BeautifulSoup libraries to scrape news data from the specified URLs.
 
 ### Data Classification [Link](https://www.kaggle.com/datasets/akashhiremath25/eventclassifier-twitter-data-set/data):
-- Employs a Multinomial model with over 93% accuracy for classifying news descriptions.
+- Employs a MultinomialNB model with over 93% accuracy for classifying news descriptions.
 - Classification categories include:
   - "political"
   - "positive"
