@@ -26,7 +26,7 @@ Or run `pip3 install -r requirements.txt` which is available in the project dire
 ### Data Scraping:
 - Utilizes the requests and BeautifulSoup libraries to scrape news data from the specified URLs.
 
-### Data Classification:
+### Data Classification [Link](https://www.kaggle.com/datasets/akashhiremath25/eventclassifier-twitter-data-set/data):
 - Employs a Multinomial model with over 93% accuracy for classifying news descriptions.
 - Classification categories include:
   - "political"
