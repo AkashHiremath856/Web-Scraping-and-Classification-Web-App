@@ -1,57 +1,31 @@
 import streamlit as st
 from tasks import scrape_url
 
-st.title('Web Scrap')
+st.title("Web Scrap")
 
-option = st.sidebar.radio('URL Input', ['URL', 'Input'])
+urls = """http://rss.cnn.com/rss/cnn_topstories.rss,\nhttp://qz.com/feed,\nhttp://feeds.foxnews.com/foxnews/politics,\nhttp://feeds.reuters.com/reuters/businessNews,\nhttp://feeds.feedburner.com/NewshourWorld,\nhttps://feeds.bbci.co.uk/news/world/asia/india/rss.xml"""
 
-if option == 'URL':
-    url = st.selectbox('Select link', [
-        "http://rss.cnn.com/rss/cnn_topstories.rss",
-        "http://qz.com/feed",
-        "http://feeds.foxnews.com/foxnews/politics",
-        "http://feeds.reuters.com/reuters/businessNews",
-        "http://feeds.feedburner.com/NewshourWorld",
-        "https://feeds.bbci.co.uk/news/world/asia/india/rss.xml",
-    ])
-    save = st.checkbox('Save Data into DB', key='url')
-    btn = st.button('Scrap')
+url = st.text_area("Enter the urls (with delimiter '`,`')", value=urls)
+save = st.checkbox("Save Data into DB", key="url")
+btn = st.button("Scrap")
 
-    if btn and url:
-        if save:
-            try:
-                result = scrape_url.apply_async(args=[url, True])
-                st.text(f"Scraping task is running in the background. Task ID: {result.id}")
-                st.sidebar.write(result['Category'].value_counts())
-                st.dataframe(result)
-            except:
-                st.write('Try another URL')
-        else:
-            try:
-                df = scrape_url(url, False)
-                st.sidebar.write(df['Category'].value_counts())
-                st.dataframe(df)
-            except:
-                st.write('Try another URL')
+if btn and url:
+    for u in url.split(","):
+        try:
+            if save:
+                result = scrape_url.apply_async(args=[u, True])
+            else:
+                result = scrape_url.apply_async(args=[u, False])
 
-if option == 'Input':
-    user_input = st.text_input('Enter URL')
-    save = st.checkbox('Save Data into DB', key='input')
-    btn = st.button('Scrap')
-    
-    if btn and user_input:
-        if save:
-            try:
-                result = scrape_url.apply_async(args=[user_input, True])
-                st.text(f"Scraping task is running in the background. Task ID: {result.id}")
-                st.sidebar.write(result['Category'].value_counts())
-                st.dataframe(result)
-            except Exception as e :
-                st.write('Try another URL{e}')
-        else:
-            try:
-                df = scrape_url(user_input, False)
-                st.sidebar.write(df['Category'].value_counts())
-                st.dataframe(df)
-            except:
-                st.write('Try another URL')
+            st.text(f"Scraping task is running in the background. Task ID: {result.id}")
+            task_status = result.get()
+
+            if task_status == "Success":
+                data = result.result
+                st.sidebar.write(data["Category"].value_counts())
+                st.dataframe(data)
+            else:
+                st.write("Try another URL")
+
+        except Exception as e:
+            st.write(f"Error: {e}. Try another URL")
