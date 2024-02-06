@@ -1,5 +1,5 @@
 import pickle
-from DataModel import Model 
+from DataModel import Model
 import numpy as np
 import pandas as pd
 import requests
@@ -11,10 +11,13 @@ import warnings
 import re
 from dotenv import load_dotenv
 
-load_dotenv()
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
-obj=Model()
+if ".env" in os.listdir("."):
+    load_dotenv()
+
+obj = Model()
+
 
 class Web_Scrap:
     def __init__(self, url):
@@ -32,14 +35,19 @@ class Web_Scrap:
                 title = item.find("title").text if item.find("title") else None
                 date = item.find("pubDate").text if item.find("pubDate") else None
                 link = item.find("link").text if item.find("link") else None
-                desc = item.find("description").text if item.find("description") else None
-                pattern = re.compile(r'<p>(.*?)<\/p>', re.DOTALL)
+                desc = (
+                    item.find("description").text if item.find("description") else None
+                )
+                pattern = re.compile(r"<p>(.*?)<\/p>", re.DOTALL)
                 matches = pattern.findall(desc)
                 if matches:
-                    cleaned_matches = [re.sub(r'<.*?>', '', match).replace(';','').replace('&','') for match in matches]
-                    desc=''
+                    cleaned_matches = [
+                        re.sub(r"<.*?>", "", match).replace(";", "").replace("&", "")
+                        for match in matches
+                    ]
+                    desc = ""
                     for match in cleaned_matches:
-                        desc+=''.join(match.strip())
+                        desc += "".join(match.strip())
                 titles.append(title)
                 descs.append(desc)
                 dates.append(date)
@@ -49,20 +57,19 @@ class Web_Scrap:
             print(f"Error Occured: {e}")
 
     def to_database(self, name: str, df):
-        df = df.drop_duplicates(subset='Titles', keep='first')
-        df.to_csv(name+'.csv',index=False)
-        password=os.environ['password']
-        engine = create_engine(f'mysql://root:{password}@localhost:3306/articles')
+        df = df.drop_duplicates(subset="Titles", keep="first")
+        df.to_csv(name + ".csv", index=False)
+        password = os.environ["password"]
         try:
-            df.to_sql(name, engine, if_exists='replace', index=False, method='multi')
+            engine = create_engine(f"mysql://root:{password}@localhost:3306/articles")
+            df.to_sql(name, engine, if_exists="replace", index=False, method="multi")
         except Exception as e:
             print(f"Error inserting data: {e}")
 
-
-    def get_category(self,data_set, model):
+    def get_category(self, data_set, model):
         data_set["Titles"] = data_set["Titles"].astype(str)
         data_set["Description"] = data_set["Description"].astype(str)
-        loaded_vectorizer = joblib.load('artifacts/vectorizer.joblib')
+        loaded_vectorizer = joblib.load("artifacts/vectorizer.joblib")
         X = data_set["Description"].apply(lambda x: obj.preprocess_text(x))
         X = loaded_vectorizer.transform(X)
         proba = np.round(model.predict_proba(X), 2)
@@ -74,7 +81,7 @@ class Web_Scrap:
                 results.append(np.argmax(p))
 
         value_mapping = {
-            0:'disaster',
+            0: "disaster",
             1: "political",
             2: "positive",
             3: "protest",
@@ -86,16 +93,17 @@ class Web_Scrap:
         return max_index_mapped
 
 
-def main(url,save=False):
+def main(url, save=False):
     o = Web_Scrap(url)
     titles, descs, dates, links = o.get_data()
     data_set = pd.DataFrame(
         {"Titles": titles, "Description": descs, "Dates": dates, "Links": links}
     )
-    if 'model.pkl' not in os.listdir('artifacts/'):
+    if "model.pkl" not in os.listdir("artifacts/"):
         obj.BuildModel()
     model = pickle.load(open("artifacts/model.pkl", "rb"))
-    data_set['Category']=o.get_category(data_set, model)
-    if save==True:
-        o.to_database('Data1',data_set)
+    data_set["Category"] = o.get_category(data_set, model)
+    if save == True:
+        print(url.split("/")[-1])
+        o.to_database(url.split("/")[-1], data_set)
     return data_set

@@ -14,66 +14,66 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-nltk.download("punkt")
-nltk.download("stopwords")
 
 class Model:
-    def __init__(self,limit=1000) -> None:    
+    def __init__(self, limit=1000) -> None:
+        nltk.download("punkt")
+        nltk.download("stopwords")
         self.LIMIT = limit
 
     def CreateDataset(self):
-        if 'Dataset.csv' not in os.listdir('archives'):
+        if "Dataset.csv" not in os.listdir("archives"):
             terror = pd.read_csv("archives/Terrorism.csv", encoding="latin-1")
             terror = terror[["Description"]]
             terror = terror.rename({"Description": "text"}, axis=1)
             terror.dropna(inplace=True)
             terror["category"] = "terror"
-            terror = terror.iloc[:self.LIMIT]
+            terror = terror.iloc[: self.LIMIT]
 
             protest = pd.read_csv("archives/Protest.csv", encoding="latin-1")
+
             def trim(s):
                 match = re.search(r":(.*)", s)
                 if match:
                     return match.group(1).strip()
                 else:
                     return s
-                
+
             protest["text"] = protest["text"].apply(lambda x: trim(x))
             protest = protest[["text"]]
             protest["category"] = "protest"
-            protest = protest.iloc[:self.LIMIT]
+            protest = protest.iloc[: self.LIMIT]
 
-            political = pd.read_csv("archives/Political.csv",low_memory=False)
+            political = pd.read_csv("archives/Political.csv", low_memory=False)
             political = political[["text"]]
             political["category"] = "political"
-            political = political.iloc[:self.LIMIT]
+            political = political.iloc[: self.LIMIT]
 
             riot = pd.read_csv("archives/Riots.csv")
             riot = riot[["text"]]
             riot.dropna(inplace=True)
             riot["category"] = "riot"
-            riot = riot.iloc[:self.LIMIT]
+            riot = riot.iloc[: self.LIMIT]
 
             positive = pd.read_csv("archives/Positive.csv")
             positive = positive[["Text"]]
             positive = positive.rename({"Text": "text"}, axis=1)
             positive["category"] = "positive"
-            positive = positive.iloc[:self.LIMIT]
+            positive = positive.iloc[: self.LIMIT]
 
             disaster = pd.read_csv("archives/Disaster.csv")
             disaster = disaster[["text"]]
             disaster.dropna(inplace=True)
             disaster["category"] = "disaster"
-            disaster = disaster.iloc[:self.LIMIT]
+            disaster = disaster.iloc[: self.LIMIT]
 
             # Merging Datasets
             df = pd.concat([terror, protest, political, riot, positive, disaster])
-            df.sample(n=len(df),random_state=16)
+            df.sample(n=len(df), random_state=16)
             df.reset_index(drop=True, inplace=True)
             df.to_csv("archives/Dataset.csv", index=False)
-    
-    
-    def preprocess_text(self,text):
+
+    def preprocess_text(self, text):
         text = text.lower()
         words = word_tokenize(text)
         words = [word for word in words if word.isalpha()]
@@ -83,13 +83,13 @@ class Model:
         words = [stemmer.stem(word) for word in words]
         return " ".join(words)
 
-    def evaluate_model(self,model, X_test, y_test):
+    def evaluate_model(self, model, X_test, y_test):
         print("Accuracy:", accuracy_score(y_test, model.predict(X_test)))
 
     def BuildModel(self):
-        if 'Dataset.csv' not in os.listdir('archives'):
+        if "Dataset.csv" not in os.listdir("archives"):
             self.CreateDataset()
-        if 'model.pkl' not in os.listdir('artifacts/'):
+        if "model.pkl" not in os.listdir("artifacts/"):
             df = pd.read_csv("archives/Dataset.csv")
             df["text"] = df["text"].apply(lambda x: self.preprocess_text(str(x)))
 
@@ -110,7 +110,7 @@ class Model:
             X, y = sampler.fit_resample(X, y)
 
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42,stratify=y
+                X, y, test_size=0.2, random_state=42, stratify=y
             )
 
             model = MultinomialNB()

@@ -16,7 +16,7 @@ Or run `pip3 install -r requirements.txt` which is available in the project dire
 
 ## Usage
 1. Navigate to the project directory.
-2. Run the Streamlit app: `streamlit run app.py`
+2. Run `celery -A tasks worker --loglevel=INFO` in a terminal and another run `streamlit run app.py`
 3. Access the web app in your browser at http://localhost:8501.
 
 ## Web App Features
@@ -59,4 +59,4 @@ This web app serves as a powerful tool for scraping news data, classifying it wi
 
 Feel free to customize and extend the functionality based on your specific requirements and datasets.
 
-**Note:** Project is built on Windows and tested on Windows. If Celery fails to run on your PC, try installing RabbitMQ server or run `app2.py`.
+**Note:** Project is built on Windows and tested on Windows and Ubuntu. If Celery fails to run on Window, Prefer using `Linux` with RabbitMQ server installed.

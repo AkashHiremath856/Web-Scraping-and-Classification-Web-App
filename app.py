@@ -1,5 +1,7 @@
 import streamlit as st
 from tasks import scrape_url
+import subprocess
+
 
 st.title("Web Scrap")
 
@@ -9,23 +11,21 @@ url = st.text_area("Enter the urls (with delimiter '`,`')", value=urls)
 save = st.checkbox("Save Data into DB", key="url")
 btn = st.button("Scrap")
 
-if btn and url:
-    for u in url.split(","):
-        try:
-            if save:
-                result = scrape_url.apply_async(args=[u, True])
-            else:
-                result = scrape_url.apply_async(args=[u, False])
+if __name__ == "__main__":
+    if btn and url:
+        for u in url.split(","):
+            try:
+                if save:
+                    result = scrape_url.apply_async(args=[u, True])
+                else:
+                    result = scrape_url.apply_async(args=[u, False])
 
-            st.text(f"Scraping task is running in the background. Task ID: {result.id}")
-            task_status = result.get()
+                s = f"Scraping task is running in the background. Task ID: {result.id}"
+                st.text(s)
+                print(s)
 
-            if task_status == "Success":
-                data = result.result
-                st.sidebar.write(data["Category"].value_counts())
-                st.dataframe(data)
-            else:
-                st.write("Try another URL")
+            except Exception as e:
+                st.write(f"Error: {e}. Try another URL")
 
-        except Exception as e:
-            st.write(f"Error: {e}. Try another URL")
+
+# Run celery -A tasks worker --loglevel=INFO
