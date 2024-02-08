@@ -1,7 +1,6 @@
 import streamlit as st
 from tasks import scrape_url
-import subprocess
-
+import time
 
 st.title("Web Scrap")
 
@@ -13,6 +12,7 @@ btn = st.button("Scrap")
 
 if __name__ == "__main__":
     if btn and url:
+        start = time.process_time()
         for u in url.split(","):
             try:
                 if save:
@@ -21,11 +21,10 @@ if __name__ == "__main__":
                     result = scrape_url.apply_async(args=[u, False])
 
                 s = f"Scraping task is running in the background. Task ID: {result.id}"
-                st.text(s)
                 print(s)
-
             except Exception as e:
                 st.write(f"Error: {e}. Try another URL")
 
+        st.text(f"Time taken to scrap{time.process_time()-start}")
 
 # Run celery -A tasks worker --loglevel=INFO
