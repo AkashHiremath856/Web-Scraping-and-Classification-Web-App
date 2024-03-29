@@ -14,10 +14,18 @@ To run the web app, ensure that you have the following installed:
 
 Or run `pip3 install -r requirements.txt` which is available in the project directory.
 
-## Usage
+# Usage
+## Native
+
 1. Navigate to the project directory.
 2. Run `celery -A tasks worker --loglevel=INFO` in the terminal and another run `streamlit run app.py`
 3. Access the web app in your browser at http://localhost:8501.
+
+## Using Docker
+1. Open terminal in Project directory.
+2. Run `docker build -t my-python-app .`
+3. Then run `docker run -d -p 8501:8501 my-python-app`
+4. Access the web app in your browser at http://localhost:8501.
 
 ## Web App Features
 ### Input Options:
